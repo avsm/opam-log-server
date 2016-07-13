@@ -20,6 +20,7 @@ depends: [
   "logs"
   "ezjsonm"
   "astring"
+  "sha"
 ]
 depopts: []
 build: [
