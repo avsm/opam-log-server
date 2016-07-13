@@ -1,0 +1,7 @@
+description = "Log collection server for OPAM bulk builds"
+version = "%%VERSION%%"
+requires = ""
+archive(byte) = "opam-log-server.cma"
+archive(native) = "opam-log-server.cmxa"
+plugin(byte) = "opam-log-server.cma"
+plugin(native) = "opam-log-server.cmxs"

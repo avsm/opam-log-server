@@ -1,0 +1,6 @@
+true : bin_annot, safe_string, package(bytes)
+true : package(webmachine), package(cohttp.lwt), package(sha), package(logs.cli)
+true : package(fmt.cli), package(fmt.tty), package(logs.fmt), package(astring)
+true : principal, short_paths, annot
+
+<src-bin> : include

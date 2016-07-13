@@ -1,0 +1,7 @@
+PKG bytes
+PKG cohttp.lwt
+PKG ezjsonm
+PKG logs.cli
+PKG sha
+S src-bin
+B _build/**
