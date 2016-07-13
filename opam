@@ -19,6 +19,7 @@ depends: [
   "fmt"
   "logs"
   "ezjsonm"
+  "astring"
 ]
 depopts: []
 build: [
