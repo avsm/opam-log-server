@@ -7,11 +7,19 @@ license: "ISC"
 dev-repo: "https://github.com/avsm/opam-log-server.git"
 bug-reports: "https://github.com/avsm/opam-log-server/issues"
 tags: []
-available: [ ocaml-version >= "4.01.0"]
+available: [ ocaml-version >= "4.02.3"]
 depends: [
   "ocamlfind" {build}
   "ocamlbuild" {build}
-  "topkg" {build} ]
+  "topkg" {build} 
+  "webmachine"
+  "cmdliner"
+  "lwt"
+  "tls"
+  "fmt"
+  "logs"
+  "ezjsonm"
+]
 depopts: []
 build: [
   "ocaml" "pkg/pkg.ml" "build"
