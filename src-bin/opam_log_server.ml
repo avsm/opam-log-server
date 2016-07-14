@@ -80,12 +80,12 @@ class item (db:Db.t) = object(self)
     Wm.Rd.lookup_path_info_exn "id" rd
 end
 
-let main () =
+let main db_dir =
   (* listen on port 8080 *)
   let port = 8080 in
   Logs.info (fun p -> p "Listening on port %d" port);
   (* create the database *)
-  let db = Db.file "./db" in
+  let db = Db.file db_dir in
   (* the route table *)
   let routes = [
     ("/logs", fun () -> new items db) ;
@@ -128,14 +128,18 @@ let setup_log style_renderer level =
 
 (* Command line interface *)
 
-let run_lwt () = Lwt_main.run (main ())
+let run_lwt db_dir () = Lwt_main.run (main db_dir)
 open Cmdliner
 
 let setup_log =
   Term.(const setup_log $ Fmt_cli.style_renderer () $ Logs_cli.level ())
 
+let db_dir =
+  let doc = "Directory to store the database in" in
+  Arg.(required & opt (some dir) None & info ["d"; "db-directory"] ~docv:"DB_DIRECTORY" ~doc)
+
 let main () =
-  match Term.(eval (const run_lwt $ setup_log, Term.info "opam-log")) with
+  match Term.(eval (const run_lwt $ db_dir $ setup_log, Term.info "opam-log-server")) with
   | `Error _ -> exit 1
   | _ -> exit (if Logs.err_count () > 0 then 1 else 0)
 
