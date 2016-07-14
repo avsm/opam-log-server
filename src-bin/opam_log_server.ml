@@ -117,7 +117,7 @@ let main () =
   in
   let config = Server.make ~callback ~conn_closed () in
   Server.create  ~mode:(`TCP(`Port port)) config
-  >>= (fun () -> Printf.eprintf "hello_lwt: listening on 0.0.0.0:%d%!" port;
+  >>= (fun () -> Printf.eprintf "opam-log-server: listening on 0.0.0.0:%d%!" port;
       Lwt.return_unit)
 
 let setup_log style_renderer level =
