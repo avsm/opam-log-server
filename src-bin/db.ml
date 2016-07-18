@@ -31,14 +31,19 @@ let file db =
     Logs.debug ~src (fun p -> p "get key id %s" id);
     Lwt.catch (fun () ->
       let buf = Buffer.create 16384 in
-      lookup id |>
-      Lwt_io.lines_of_file |>
-      Lwt_stream.iter_s (fun line ->
-        Buffer.add_string buf line;
-        Buffer.add_char buf '\n';
-        Lwt.return_unit
-      ) >>= fun () ->
-      Lwt.return_some (Buffer.contents buf)
+      lookup id |> fun fname ->
+      Lwt_process.pread_lines ("bunzip2",[|"bunzip2";"-c";(fname^".bz2")|]) |> fun st ->
+      Lwt_stream.peek st >>= function
+      | None -> (* no response so assume error *)
+         Logs.debug ~src (fun p -> p "empty response stream from file");
+         Lwt.return_none
+      | Some _ ->
+         Lwt_stream.iter_s (fun line ->
+           Buffer.add_string buf line;
+           Buffer.add_char buf '\n';
+           Lwt.return_unit
+         ) st >>= fun () ->
+         Lwt.return_some (Buffer.contents buf)
     ) (fun exn ->
       Logs.debug ~src (fun p -> p "not found due to %s" (Printexc.to_string exn));
       Lwt.return_none
@@ -49,13 +54,19 @@ let file db =
     Logs.debug ~src (fun p -> p "Added item of length %d with hash %s" (String.length v) id);
     let temp_file = Filename.temp_file ~temp_dir:db "tmp_" "_tmp" in
     Lwt_io.with_file ~mode:Lwt_io.output temp_file (fun oc -> Lwt_io.write oc v) >>= fun () ->
-    Lwt_unix.rename temp_file (lookup id) >>= fun () ->
-    Lwt.return id
+    Lwt_unix.system ("bzip2 -9 -f " ^ temp_file) >>= function
+    | Lwt_unix.WEXITED 0 ->
+        Lwt_unix.rename (temp_file ^ ".bz2") ((lookup id) ^ ".bz2") >>= fun () ->
+        Lwt.return id
+    | _ ->
+        Logs.err ~src (fun p -> p "Error exec'ing bz2");
+        Lwt_unix.unlink temp_file >>= fun () ->
+        Lwt.fail (Failure "bz2")
   
   method delete id =
     Lwt.catch (fun () ->
       if Id.check id then
-         Lwt_unix.unlink (lookup id) >>= fun () ->
+         Lwt_unix.unlink ((lookup id)^".bz2") >>= fun () ->
          Lwt.return_true
       else
          Lwt.return_false
