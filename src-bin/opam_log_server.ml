@@ -52,10 +52,8 @@ class item (db:Db.t) = object(self)
     db#get (self#id rd)
     >>= function
       | None   ->
-         Logs.debug (fun p -> p "resource_exists: false for %s" id);
          Wm.continue false rd
       | Some _ ->
-         Logs.debug (fun p -> p "resource_exists: true for %s" id);
          Wm.continue true rd
 
   method content_types_provided rd =
